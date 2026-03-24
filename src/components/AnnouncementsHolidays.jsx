@@ -308,6 +308,24 @@ export default function AnnouncementsHolidays({ isAdmin = false }) {
         return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     }
 
+    const handleAnnKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (!saving && annTitle.trim()) {
+                addAnnouncement();
+            }
+        }
+    };
+
+    const handleHolKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!saving && holName.trim() && holDate) {
+                addHoliday();
+            }
+        }
+    };
+
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 24 }}>
 
@@ -331,6 +349,7 @@ export default function AnnouncementsHolidays({ isAdmin = false }) {
                             placeholder="Title *"
                             value={annTitle}
                             onChange={e => setAnnTitle(e.target.value)}
+                            onKeyDown={handleAnnKeyDown}
                             style={{ width: '100%', marginBottom: 8 }}
                         />
                         <textarea
@@ -338,6 +357,7 @@ export default function AnnouncementsHolidays({ isAdmin = false }) {
                             placeholder="Message (optional)"
                             value={annBody}
                             onChange={e => setAnnBody(e.target.value)}
+                            onKeyDown={handleAnnKeyDown}
                             rows={3}
                             style={{ width: '100%', resize: 'vertical', marginBottom: 8, fontFamily: 'inherit' }}
                         />
@@ -350,8 +370,13 @@ export default function AnnouncementsHolidays({ isAdmin = false }) {
                             <input
                                 type="date"
                                 className="filter-input"
+                                min={(() => {
+                                    const d = new Date();
+                                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                                })()}
                                 value={annDate}
                                 onChange={e => setAnnDate(e.target.value)}
+                                onKeyDown={handleAnnKeyDown}
                                 style={{ width: '100%' }}
                             />
                         </div>
@@ -420,8 +445,8 @@ export default function AnnouncementsHolidays({ isAdmin = false }) {
 
                 {isAdmin && showHolForm && (
                     <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', background: 'var(--green-50)' }}>
-                        <input className="filter-input" placeholder="Holiday name *" value={holName} onChange={e => setHolName(e.target.value)} style={{ width: '100%', marginBottom: 8 }} />
-                        <input type="date" className="filter-input" value={holDate} onChange={e => setHolDate(e.target.value)} style={{ width: '100%', marginBottom: 8 }} />
+                        <input className="filter-input" placeholder="Holiday name *" value={holName} onChange={e => setHolName(e.target.value)} onKeyDown={handleHolKeyDown} style={{ width: '100%', marginBottom: 8 }} />
+                        <input type="date" className="filter-input" value={holDate} onChange={e => setHolDate(e.target.value)} onKeyDown={handleHolKeyDown} style={{ width: '100%', marginBottom: 8 }} />
                         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                             <button className="btn btn-secondary btn-sm" onClick={() => setShowHolForm(false)}><X size={13} /></button>
                             <button className="btn btn-primary btn-sm" onClick={addHoliday} disabled={saving || !holName.trim() || !holDate}>

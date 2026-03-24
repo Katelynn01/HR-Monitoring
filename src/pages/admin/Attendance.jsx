@@ -9,7 +9,10 @@ export default function Attendance() {
     const [records, setRecords] = useState([]);
     const [users, setUsers] = useState({});
     const [search, setSearch] = useState('');
-    const [dateFilter, setDateFilter] = useState('');
+    const [dateFilter, setDateFilter] = useState(() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    });
     const [loading, setLoading] = useState(true);
     const [selectedHistoryUser, setSelectedHistoryUser] = useState(null);
 

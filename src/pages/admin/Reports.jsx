@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
-import { BarChart3, Download, Filter, ChevronDown, ChevronRight, Sunrise, FileText } from 'lucide-react';
+import { BarChart3, Download, Filter, ChevronDown, ChevronRight, Sunrise, FileText, Users } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -19,7 +19,7 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 export default function Reports() {
-    const [reportType, setReportType] = useState('daily');
+    const [reportType, setReportType] = useState('monthly');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [reportData, setReportData] = useState([]);

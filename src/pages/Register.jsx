@@ -2,18 +2,18 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from '../components/Logo';
-import { Mail, Lock, User, Building2, UserPlus, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Building2, UserPlus, AlertCircle, Eye, EyeOff, CheckCircle } from 'lucide-react';
 
 const DEPARTMENTS = ['Agriculture', 'Operations', 'Accounting', 'Human Resources', 'Business Solutions', 'Marketing'];
 
 function GoogleIcon() {
     return (
         <svg width="18" height="18" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            <path fill="none" d="M0 0h48v48H0z"/>
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+            <path fill="none" d="M0 0h48v48H0z" />
         </svg>
     );
 }
@@ -24,9 +24,17 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [department, setDepartment] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+    const reqs = [
+        { label: 'At least 8 characters long', met: password.length >= 8 },
+        { label: 'One uppercase letter', met: /[A-Z]/.test(password) },
+        { label: 'One lowercase letter', met: /[a-z]/.test(password) },
+        { label: 'One number', met: /\d/.test(password) }
+    ];
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    
+
     // Department selection for new Google users
     const [selectedDept, setSelectedDept] = useState('');
 
@@ -35,8 +43,9 @@ export default function Register() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters');
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            setError('Password must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 number.');
             return;
         }
         setError('');
@@ -76,9 +85,9 @@ export default function Register() {
         try {
             const { doc, updateDoc, deleteField } = await import('firebase/firestore');
             const { db } = await import('../firebase');
-            await updateDoc(doc(db, 'users', user.uid), { 
+            await updateDoc(doc(db, 'users', user.uid), {
                 department: selectedDept,
-                needsDepartment: deleteField() 
+                needsDepartment: deleteField()
             });
             // App.jsx will automatically redirect once needsDepartment is gone
         } catch (err) {
@@ -130,9 +139,11 @@ export default function Register() {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 className="form-input"
-                                placeholder="Min. 6 characters"
+                                placeholder="Enter your Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                onFocus={() => setIsPasswordFocused(true)}
+                                onBlur={() => setIsPasswordFocused(false)}
                                 required
                                 style={{ paddingRight: '40px', width: '100%' }}
                             />
@@ -157,6 +168,26 @@ export default function Register() {
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
+                        {(isPasswordFocused || password.length > 0) && (
+                            <div style={{
+                                marginTop: '10px',
+                                padding: '12px 14px',
+                                background: '#f8fafc',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '8px',
+                                fontSize: '0.8rem',
+                                color: '#475569',
+                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
+                            }}>
+                                <div style={{ marginBottom: '8px', fontWeight: 600, color: '#1e293b' }}>Password must contain:</div>
+                                {reqs.map((r, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', color: r.met ? '#16a34a' : '#64748b' }}>
+                                        {r.met ? <CheckCircle size={14} /> : <div style={{ width: 14, height: 14, borderRadius: '50%', border: '1px solid currentColor', opacity: 0.4 }} />}
+                                        <span style={{ fontWeight: r.met ? 500 : 400 }}>{r.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <div className="form-group">
                         <label><Building2 size={14} /> Department</label>
