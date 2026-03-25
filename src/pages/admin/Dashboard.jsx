@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
 import { collection, query, getDocs, where, Timestamp } from 'firebase/firestore';
-import { Users, UserCheck, Clock, CalendarOff, TrendingUp, Sprout, Sunrise } from 'lucide-react';
+import { Users, UserCheck, Clock, CalendarOff, TrendingUp, Sprout, Sunrise, PartyPopper, X } from 'lucide-react';
 import LoadingScreen from '../../components/LoadingScreen';
 import AnnouncementsHolidays from '../../components/AnnouncementsHolidays';
 import { Line } from 'react-chartjs-2';
@@ -33,6 +33,8 @@ export default function AdminDashboard() {
     const [recentAttendance, setRecentAttendance] = useState([]);
     const [earlyArrivals, setEarlyArrivals] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showAllPresentPopup, setShowAllPresentPopup] = useState(false);
+    const allPresentShownRef = useRef(false);
 
     useEffect(() => {
         fetchDashboardData();
@@ -79,6 +81,12 @@ export default function AdminDashboard() {
             });
 
             setStats({ totalEmployees, presentToday, onLeave, pendingRequests });
+
+            // Show popup if all employees are present
+            if (totalEmployees > 0 && presentToday >= totalEmployees && !allPresentShownRef.current) {
+                allPresentShownRef.current = true;
+                setShowAllPresentPopup(true);
+            }
 
             // Build weekly data
             const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -209,6 +217,60 @@ export default function AdminDashboard() {
 
     return (
         <div>
+            {/* All Employees Present Popup */}
+            {showAllPresentPopup && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 9999, animation: 'fadeIn 0.25s ease'
+                }}>
+                    <div style={{
+                        background: '#fff', borderRadius: 20, padding: '40px 36px',
+                        width: '90%', maxWidth: 440, textAlign: 'center',
+                        boxShadow: '0 24px 80px rgba(0,0,0,0.2)',
+                        position: 'relative', animation: 'slideUp 0.3s ease'
+                    }}>
+                        <button
+                            onClick={() => setShowAllPresentPopup(false)}
+                            style={{
+                                position: 'absolute', top: 14, right: 14,
+                                background: 'none', border: 'none', cursor: 'pointer',
+                                color: 'var(--gray-400)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}
+                        >
+                            <X size={20} />
+                        </button>
+                        <div style={{
+                            width: 72, height: 72, borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 20px', boxShadow: '0 8px 24px rgba(34,197,94,0.35)'
+                        }}>
+                            <PartyPopper size={34} color="#fff" />
+                        </div>
+                        <h2 style={{ margin: '0 0 10px', fontSize: '1.5rem', color: '#1a2e1a', fontWeight: 700 }}>
+                            Full House! 🎉
+                        </h2>
+                        <p style={{ color: '#4b5563', fontSize: '0.95rem', margin: '0 0 8px', lineHeight: 1.6 }}>
+                            All <strong style={{ color: '#16a34a' }}>{stats.totalEmployees} employees</strong> are present today.
+                        </p>
+                        <p style={{ color: '#9ca3af', fontSize: '0.82rem', marginBottom: 28 }}>
+                            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                        </p>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => setShowAllPresentPopup(false)}
+                            style={{ minWidth: 140 }}
+                        >
+                            Awesome!
+                        </button>
+                    </div>
+                    <style>{`
+                        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+                        @keyframes slideUp { from { transform: translateY(30px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+                    `}</style>
+                </div>
+            )}
             <div className="section-header">
                 <div>
                     <h1 className="page-title"><Sprout size={28} /> HR Dashboard</h1>
