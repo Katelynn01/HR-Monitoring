@@ -1,7 +1,10 @@
 import { useState, useEffect, Fragment } from 'react';
 import { db } from '../../firebase';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
-import { BarChart3, Filter, ChevronDown, ChevronRight, Sunrise } from 'lucide-react';
+import { BarChart3, Filter, ChevronDown, ChevronRight, Sunrise, FileText } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { saveAs } from 'file-saver';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -135,6 +138,137 @@ export default function Reports() {
         setLoading(false);
     }
 
+    async function loadLetterhead() {
+        const response = await fetch('/Gemini_LetterHead.jpg');
+        const blob = await response.blob();
+        return new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    async function exportPDF() {
+        if (reportData.length === 0) return;
+
+        const letterheadDataUrl = await loadLetterhead();
+
+        const doc = new jsPDF();
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const HEADER_H = 48;
+        const FOOTER_H = 32;
+
+        const drawLetterhead = () => {
+            doc.addImage(letterheadDataUrl, 'JPEG', 0, 0, pageW, pageH);
+        };
+
+        drawLetterhead();
+
+        doc.setFontSize(16);
+        doc.setTextColor(22, 101, 52);
+        doc.text('Attendance Report', pageW / 2, HEADER_H + 8, { align: 'center' });
+        doc.setFontSize(9);
+        doc.setTextColor(80);
+        doc.text(`Period: ${dateFrom}  to  ${dateTo}`, pageW / 2, HEADER_H + 15, { align: 'center' });
+        doc.text(`Generated: ${new Date().toLocaleString()}`, pageW / 2, HEADER_H + 20, { align: 'center' });
+
+        const attendanceData = reportData.map(r => [r.name, r.department, r.type === 'bidding' ? 'Bidding' : 'Regular', r.date, r.timeIn, r.timeOut, `${r.totalHours}h`]);
+        autoTable(doc, {
+            startY: HEADER_H + 25,
+            margin: { bottom: FOOTER_H },
+            head: [['Name', 'Department', 'Type', 'Date', 'Time In', 'Time Out', 'Total Hours']],
+            body: attendanceData,
+            theme: 'grid',
+            headStyles: { fillColor: [22, 163, 74], textColor: 255, fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [240, 253, 244] },
+            styles: { fontSize: 9 },
+            didAddPage: () => drawLetterhead()
+        });
+
+        if (earlyBirdsData.length > 0) {
+            const afterAttendanceY = doc.lastAutoTable.finalY + 14;
+            doc.setFontSize(13);
+            doc.setTextColor(22, 101, 52);
+            doc.text('Early Birds Summary', 14, afterAttendanceY);
+            doc.setFontSize(9);
+            doc.setTextColor(120);
+            doc.text('Official start time: 8:30 AM', 14, afterAttendanceY + 6);
+
+            const earlyData = earlyBirdsData.map((r, i) => [
+                `#${i + 1}`,
+                r.name,
+                r.department,
+                `${r.earlyDays} day${r.earlyDays !== 1 ? 's' : ''}`,
+                r.avgMinsEarly >= 60 ? `${Math.floor(r.avgMinsEarly / 60)}h ${r.avgMinsEarly % 60}m` : `${r.avgMinsEarly}m`,
+                r.earliestTimeStr,
+                r.earlyDays >= 5 ? 'Consistent' : r.earlyDays >= 3 ? 'Regular' : 'Occasional'
+            ]);
+            autoTable(doc, {
+                startY: afterAttendanceY + 10,
+                margin: { bottom: FOOTER_H },
+                head: [['#', 'Name', 'Department', 'Early Days', 'Avg Early', 'Earliest', 'Status']],
+                body: earlyData,
+                theme: 'grid',
+                headStyles: { fillColor: [234, 179, 8], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [254, 252, 232] },
+                styles: { fontSize: 9 },
+                didAddPage: () => drawLetterhead()
+            });
+        }
+
+        saveAs(doc.output('blob'), `attendance_report_${dateFrom}_${dateTo}.pdf`);
+    }
+
+    async function exportEarlyBirdsPDF() {
+        if (earlyBirdsData.length === 0) return;
+
+        const letterheadDataUrl = await loadLetterhead();
+
+        const doc = new jsPDF();
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const HEADER_H = 48;
+        const FOOTER_H = 32;
+
+        const drawLetterhead = () => {
+            doc.addImage(letterheadDataUrl, 'JPEG', 0, 0, pageW, pageH);
+        };
+
+        drawLetterhead();
+
+        doc.setFontSize(16);
+        doc.setTextColor(22, 101, 52);
+        doc.text('Early Birds Summary', pageW / 2, HEADER_H + 8, { align: 'center' });
+        doc.setFontSize(9);
+        doc.setTextColor(80);
+        doc.text(`Period: ${dateFrom}  to  ${dateTo}`, pageW / 2, HEADER_H + 15, { align: 'center' });
+        doc.text(`Generated: ${new Date().toLocaleString()}`, pageW / 2, HEADER_H + 20, { align: 'center' });
+
+        const tableData = earlyBirdsData.map((r, i) => [
+            `#${i + 1}`,
+            r.name,
+            r.department,
+            `${r.earlyDays} day${r.earlyDays !== 1 ? 's' : ''}`,
+            r.avgMinsEarly >= 60 ? `${Math.floor(r.avgMinsEarly / 60)}h ${r.avgMinsEarly % 60}m` : `${r.avgMinsEarly}m`,
+            r.earliestTimeStr,
+            r.earlyDays >= 5 ? 'Consistent Early Bird' : r.earlyDays >= 3 ? 'Regular Early Bird' : 'Occasional'
+        ]);
+        autoTable(doc, {
+            startY: HEADER_H + 25,
+            margin: { bottom: FOOTER_H },
+            head: [['#', 'Name', 'Department', 'Early Days', 'Avg Early', 'Earliest Time', 'Status']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [22, 163, 74], textColor: 255, fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [240, 253, 244] },
+            styles: { fontSize: 9 },
+            didAddPage: () => drawLetterhead()
+        });
+
+        saveAs(doc.output('blob'), `early_birds_report_${dateFrom}_${dateTo}.pdf`);
+    }
+
 
     const deptChartData = {
         labels: Object.keys(departmentData),
@@ -187,6 +321,11 @@ export default function Reports() {
                         <button className="btn btn-primary btn-sm" onClick={generateReport} disabled={loading}>
                             {loading ? 'Generating...' : 'Generate Analytics'}
                         </button>
+                        {reportData.length > 0 && (
+                            <button className="btn btn-secondary btn-sm" onClick={exportPDF} style={{ borderColor: '#dc2626', color: '#dc2626' }}>
+                                <FileText size={14} /> Export PDF
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -278,7 +417,14 @@ export default function Reports() {
                     <div className="content-card" style={{ marginTop: 24 }}>
                         <div className="card-header">
                             <h3><Sunrise size={18} /> Early Birds Summary</h3>
-                            <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>Official start: 8:30 AM</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>Official start: 8:30 AM</span>
+                                {earlyBirdsData.length > 0 && (
+                                    <button className="btn btn-secondary btn-sm" onClick={exportEarlyBirdsPDF} style={{ borderColor: '#dc2626', color: '#dc2626' }}>
+                                        <FileText size={14} /> Export PDF
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         <div className="card-body-flush">
                             <table className="data-table">
