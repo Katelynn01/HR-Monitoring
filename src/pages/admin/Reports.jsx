@@ -418,7 +418,7 @@ export default function Reports() {
                         <div className="card-header">
                             <h3><Sunrise size={18} /> Early Birds Summary</h3>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>Official start: 8:30 AM</span>
+                                <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>Official start: 7:30 AM</span>
                                 {earlyBirdsData.length > 0 && (
                                     <button className="btn btn-secondary btn-sm" onClick={exportEarlyBirdsPDF} style={{ borderColor: '#dc2626', color: '#dc2626' }}>
                                         <FileText size={14} /> Export PDF

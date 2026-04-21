@@ -144,7 +144,7 @@ export default function MyAttendance() {
                                         <td><span className="badge badge-success">{shift.timeIn}</span></td>
                                         <td><span className={`badge ${shift.timeOut === 'Active' ? 'badge-warning' : 'badge-info'}`}>{shift.timeOut}</span></td>
                                         <td>{shift.totalHours > 0 ? `${shift.totalHours.toFixed(1)}h` : '—'}</td>
-                                        <td style={{ color: shift.totalHours > 8 ? 'var(--yellow-700)' : 'inherit', fontWeight: shift.totalHours > 8 ? 600 : 400 }}>{shift.totalHours > 8 ? `${(shift.totalHours - 8).toFixed(1)}h` : '—'}</td>
+                                        <td style={{ color: shift.totalHours > 11 ? 'var(--yellow-700)' : 'inherit', fontWeight: shift.totalHours > 11 ? 600 : 400 }}>{shift.totalHours > 11 ? `${(shift.totalHours - 11).toFixed(1)}h` : '—'}</td>
                                         <td>
                                             <span className="badge badge-neutral" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                                                 <Lock size={11} /> Locked

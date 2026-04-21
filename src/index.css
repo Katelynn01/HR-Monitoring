@@ -1528,6 +1528,9 @@ input::-webkit-reveal {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
+}
+
+.profile-picture-container.editable {
     cursor: pointer;
 }
 
@@ -1588,6 +1591,30 @@ input::-webkit-reveal {
     to {
         transform: rotate(360deg);
     }
+}
+
+.remove-picture-btn {
+    position: absolute;
+    bottom: -4px;
+    right: -8px;
+    background: var(--danger);
+    color: white;
+    border: 2px solid var(--white);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    padding: 0;
+    transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.remove-picture-btn:hover {
+    transform: scale(1.1);
+    background: #b91c1c;
 }
 
 .profile-picture-msg {
@@ -1770,4 +1797,64 @@ input::-webkit-reveal {
 @keyframes luckProgress {
     from { width: 0%; }
     to   { width: 100%; }
+}
+
+/* ════════════════════════════════════════════
+   CROPPER MODAL
+   ════════════════════════════════════════════ */
+.crop-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.crop-modal-content {
+    background: var(--bg-primary);
+    padding: 24px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.crop-modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.cropper-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #333;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cropper-controls {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+}
+
+.zoom-slider {
+    width: 80%;
+    cursor: pointer;
+}
+
+.crop-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
 }

@@ -159,8 +159,8 @@ export default function AdminDashboard() {
             });
             setRecentAttendance(recent.slice(0, 10));
 
-            // Identify early arrivals (clocked in before 8:30 AM)
-            const WORK_HOUR = 8;
+            // Identify early arrivals (clocked in before 7:30 AM)
+            const WORK_HOUR = 7;
             const WORK_MINUTE = 30;
             const earlyList = [];
             recentSnap.forEach(d => {
@@ -390,7 +390,7 @@ export default function AdminDashboard() {
                                             <td><span className="badge badge-success">{r.timeIn}</span></td>
                                             <td><span className="badge badge-warning">{r.timeOut}</span></td>
                                             <td>{r.totalHours}h</td>
-                                            <td style={{ color: parseFloat(r.totalHours) > 8 ? 'var(--yellow-700)' : 'inherit', fontWeight: parseFloat(r.totalHours) > 8 ? 600 : 400 }}>{parseFloat(r.totalHours) > 8 ? `${(parseFloat(r.totalHours) - 8).toFixed(1)}h` : '—'}</td>
+                                            <td style={{ color: parseFloat(r.totalHours) > 11 ? 'var(--yellow-700)' : 'inherit', fontWeight: parseFloat(r.totalHours) > 11 ? 600 : 400 }}>{parseFloat(r.totalHours) > 11 ? `${(parseFloat(r.totalHours) - 11).toFixed(1)}h` : '—'}</td>
                                         </tr>
                                     ))
                                 )}
@@ -407,7 +407,7 @@ export default function AdminDashboard() {
             <div className="content-card" style={{ marginTop: 24 }}>
                 <div className="card-header">
                     <h3><Sunrise size={18} /> Early Arrivals Today</h3>
-                    <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>Official start: 8:30 AM</span>
+                    <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>Official start: 7:30 AM</span>
                 </div>
                 <div className="card-body-flush">
                     <table className="data-table">

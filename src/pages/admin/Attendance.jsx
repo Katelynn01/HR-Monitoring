@@ -199,7 +199,7 @@ export default function Attendance() {
                                                 </td>
                                                 
                                                 <td style={{ fontWeight: 600 }}>{r.totalHours}h</td>
-                                                <td style={{ fontWeight: 600, color: parseFloat(r.totalHours) > 8 ? 'var(--yellow-700)' : 'inherit' }}>{parseFloat(r.totalHours) > 8 ? `${(parseFloat(r.totalHours) - 8).toFixed(1)}h` : '—'}</td>
+                                                <td style={{ fontWeight: 600, color: parseFloat(r.totalHours) > 11 ? 'var(--yellow-700)' : 'inherit' }}>{parseFloat(r.totalHours) > 11 ? `${(parseFloat(r.totalHours) - 11).toFixed(1)}h` : '—'}</td>
                                                 <td>
                                                     <span className="badge badge-neutral" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                                                         <Lock size={12} /> Locked

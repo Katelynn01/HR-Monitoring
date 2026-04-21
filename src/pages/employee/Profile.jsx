@@ -145,7 +145,7 @@ export default function Profile() {
                     <div className="card-body" style={{ padding: '1.5rem', background: 'var(--bg-primary)', borderBottomLeftRadius: '0.5rem', borderBottomRightRadius: '0.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '3.5rem', marginTop: '1.5rem' }}>
                             <div style={{ transform: 'scale(3.2)', transformOrigin: 'center' }}>
-                                <ProfilePicture userProfile={userProfile} />
+                                <ProfilePicture userProfile={userProfile} isEditing={isEditing} />
                             </div>
                         </div>
                         <div className="info-group">

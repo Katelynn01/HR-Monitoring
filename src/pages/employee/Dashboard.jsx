@@ -29,7 +29,7 @@ export default function EmployeeDashboard() {
                 const data = d.data();
                 const th = data.totalHours || 0;
                 totalHours += th;
-                if (th > 8) totalOT += (th - 8);
+                if (th > 11) totalOT += (th - 11);
                 records.push({
                     id: d.id,
                     type: data.type || 'regular',
@@ -218,7 +218,7 @@ export default function EmployeeDashboard() {
                                         <td><span className="badge badge-success">{shift.timeIn}</span></td>
                                         <td><span className={`badge ${shift.timeOut === 'Active' ? 'badge-warning' : 'badge-info'}`}>{shift.timeOut}</span></td>
                                         <td>{shift.totalHours > 0 ? `${shift.totalHours.toFixed(1)}h` : '—'}</td>
-                                        <td>{shift.totalHours > 8 ? <span className="badge badge-warning" style={{color: 'var(--yellow-700)'}}>{(shift.totalHours - 8).toFixed(1)}h</span> : '—'}</td>
+                                        <td>{shift.totalHours > 11 ? <span className="badge badge-warning" style={{color: 'var(--yellow-700)'}}>{(shift.totalHours - 11).toFixed(1)}h</span> : '—'}</td>
                                     </tr>
                                 ))
                             )}
